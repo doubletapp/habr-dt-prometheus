@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  prometheus:
+    build: ./prometheus
+    volumes:
+      - prometheus_data:/prometheus
+
+  grafana:
+    build: ./grafana
+    volumes:
+     - grafana_data:/var/lib/grafana
+    ports:
+      - ${GF_PORT}:3000
+    env_file: .env
+
+  alertmanager:
+    build: ./alertmanager
+    volumes:
+      - alertmanager_data:/alertmanager
+
+  webhook-receiver:
+    build: ./webhook-receiver
+    env_file: .env
+
+  nginx:
+    build: ./nginx
+    ports:
+      - ${PORT}:80
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:

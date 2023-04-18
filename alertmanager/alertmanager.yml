@@ -1,0 +1,29 @@
+# в блоке route определяется корневая нода дерева маршрутизации уведолений к обработчикам
+# и параметры, которые будут унаследованы всеми определенными в routes нодами
+route:
+  group_wait: 0s
+  group_interval: 1s
+  repeat_interval: 4h
+  group_by: [...]
+
+  # ноды дерева маршрутизации - потомки корня
+  routes:
+  # - match: параметры, по которым выбирается уведомление
+  #   receiver: название обработчика, куда будет отправлено уведомление
+
+    - match:
+        instance_group: example_group
+      receiver: example-receiver
+
+# список обработчиков уведомлений
+receivers:
+# - name: название обработчика
+#   webhook_configs:
+#     - send_resolved: уведомлять ли о разрешенных уведомлениях
+#       url: куда будет отправлен POST-запрос с уведомлением
+
+  - name: example-receiver
+    webhook_configs:
+      - send_resolved: True
+        url: http://webhook-receiver:3000/alert/<tg-channel-id>
+ 
