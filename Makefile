@@ -1,7 +1,7 @@
 all: build down up
 
 env:
-	cp .env.example .env
+	if [ ! -f .env ]; then cp .env.example .env; fi;
 
 build:
 	docker-compose build
