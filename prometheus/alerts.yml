@@ -1,0 +1,70 @@
+groups:
+  - name: default
+    rules:
+    # - alert: название алерта
+    #   expr: выражение PromQL для вычисления
+    #   for: алерт считаются активированными, если выражение expr верно в течение этого времени
+    #   labels: дополнительные данные для алерта
+    #   annotations: 
+    #     summary: текстовое описание
+
+      # приложение не работает
+      - alert: ServiceDown
+        expr: up{instance_type='service'} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} has been down for more than 5 minutes"
+
+      # сервер не работает
+      - alert: NodeDown
+        expr: up{instance_type='node'} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.instance }} has been down for more than 5 minutes"
+
+      # на сервере мало свободного места на диске
+      - alert: NodeLowDiskSpace
+        expr: node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes * 100 <= 5 # ??
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.instance }} is low on disk space"
+
+      # на сервере мало свободной памяти
+      - alert: NodeLowMemory
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes <= 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.instance }} is low on RAM for more than 5 minutes"
+
+      # на сервере высокое потребление ЦПУ
+      - alert: NodeHighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu{job="node",mode="idle"}[1m])) * 100) >= 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Node {{ $labels.instance }} is high on CPU usage for more than 5 minutes"
+
+      # приложение не доступно (прокси отвечает 502 Bad Gateway)
+      - alert: ServiceNotAvailable
+        expr: floor(sum(increase(nginx_http_response_count_total{status='502'}[1m]))) > 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} has not been available for more than 3 minutes."
+
+      # приложение возвращает 500-е коды ответов
+      - alert: ServiceError
+        expr: floor(sum(increase(nginx_http_response_count_total{status=~'5..',status!='502'}[1m]))) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} has just thrown 5xx error."

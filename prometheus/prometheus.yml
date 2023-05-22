@@ -1,0 +1,49 @@
+# секция global указывает параметры для всех конфигураций сбора метрик
+global:
+  # как часто запрашивать метрики по умолчанию
+  scrape_interval: 10s
+  # как часто пересчитывать правила для алертов (подробнее - в alerts.yml)
+  evaluation_interval: 10s
+
+# список конфигураций сбора метрик
+scrape_configs:
+# - job_name: название процесса, который собирает метрики
+#   static_configs:
+#     - targets: список доменов/ip, с которых будут собираться метрики в рамках процесса
+#       labels: дополнительные лэйблы, которые добавятся к записи
+#         instance_group: название проекта
+#         instance_env: окружение приложения (test/prod)
+#         instance_type: тип источника метрик (service/node)
+#         team: команда, ответственная за проект
+
+  - job_name: example-node
+    static_configs:
+      - targets:
+          - test.example-node-url.com:9100
+        labels:
+          instance_group: example_project
+          instance_env: test
+          instance_type: node
+
+  - job_name: example-service
+    static_configs:
+      - targets:
+        - prod.example-service-url.com
+        labels:
+          instance_group: example_project
+          instance_env: test
+          instance_type: service
+          team: backend
+
+
+# список файлов с описанием алертов
+rule_files:
+ - alerts.yml
+
+# опции, связанные с Alertmanger. Протокол, префикс URL, адрес. 
+alerting:
+  alertmanagers:
+   - scheme: http
+     path_prefix: /alertmanager
+     static_configs:
+       - targets: [ "alertmanager:9093" ]
